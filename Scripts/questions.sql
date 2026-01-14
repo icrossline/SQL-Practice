@@ -88,7 +88,19 @@
 	SELECT Department  ,AVG(Salary)
 	FROM Employees
 	GROUP BY Department
-	HAVING AVG(salary) > 80000
+	HAVING AVG(salary) > 80000;
+
+	OR 
+
+
+	SELECT DISTINCT Department, avg_salary
+	FROM  
+		(
+	    SELECT *,
+	           AVG(Salary) OVER (PARTITION BY Department) AS avg_salary
+	    FROM Employees
+		) t
+	WHERE avg_salary > 80000;
 
 	
 
