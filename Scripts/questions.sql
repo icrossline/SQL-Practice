@@ -1,3 +1,8 @@
+-- ===========================================================================
+-- Contains solved Queries for only  Employees Datasets 
+-- ===========================================================================
+
+
 -- Q1.Display all employee details.
 
   SELECT *FROM Employees;
