@@ -102,5 +102,127 @@
 		) t
 	WHERE avg_salary > 80000;
 
-	
+-- Q16. Show employee name and their manager name.
 
+SELECT e1.EmpName,e2.EmpName AS Manager_Name FROM Employees e1
+LEFT JOIN  Employees e2
+ON e1.ManagerID = e2.EmpID;
+
+-- Q17. List employees who do NOT have a manager.
+
+SELECT EmpName 
+FROM Employees
+WHERE ManagerID IS NULL;
+
+		 -- OR 
+ -- 
+SELECT e1.EmpName FROM Employees e1
+LEFT JOIN  Employees e2
+ON e1.ManagerID = e2.EmpID
+WHERE e1.ManagerID IS NULL;
+
+-- Q18. Find employees whose manager earns more than 100,000.
+
+					--Detailed Version
+	SELECT 
+		e1.EmpName ,
+		e1.Salary , 
+		e2.EmpName AS Manager_Name ,
+		e2.Salary as Manager_Salary 
+	FROM Employees e1
+	LEFT JOIN  Employees e2
+	ON e1.ManagerID = e2.EmpID
+	WHERE e2.Salary > 100000;
+ 
+						 --OR
+  
+	SELECT e1.EmpName  FROM Employees e1
+	LEFT JOIN  Employees e2
+	ON e1.ManagerID = e2.EmpID
+	WHERE e2.Salary > 100000;
+
+-- Q19 Rank employees by salary within each department.
+
+	SELECT EmpName ,Department ,Salary ,
+	ROW_NUMBER() OVER(PARTITION BY Department  ORDER BY Salary DESC) as Rank
+	FROM Employees;
+
+-- Q20. Find the 2nd highest salary in each department.
+	
+	SELECT 
+		EmpName ,
+		Department ,
+		Salary 
+	FROM (
+		SELECT * , 
+		DENSE_RANK() OVER(PARTITION BY Department  ORDER BY Salary DESC) as Rank
+		FROM Employees
+		 )t
+		 WHERE Rank =2;
+
+-- Q21. Display employee salary along with the average salary of their department.
+ 
+ 	SELECT EmpName,  Department , salary ,Dept_avg_salary
+	FROM (
+			SELECT * , 
+			AVG(salary) OVER(Partition By Department ) as Dept_avg_salary
+			FROM Employees
+			)t;
+			
+-- Q22. Identify employees whose salary is above their department average.
+ 
+	SELECT EmpName , Department , Salary 
+	FROM (
+		 SELECT *,
+			AVG(Salary) OVER(Partition By Department) as Dept_avg_salary
+		FROM Employees
+		)t
+		Where Salary > Dept_avg_salary;
+
+-- Q23. Assign row numbers to employees based on HireDate (earliest first).
+ 
+	SELECT EmpName , HireDate ,
+	ROW_NUMBER() OVER(ORDER BY HireDate ASC) as RowNum
+	FROM EMployees;
+
+-- Q24. Create a column SalaryGrade:
+
+	--Salary ≥ 100000 → High
+
+	--Salary between 70000 and 99999 → Medium
+
+	--Else → Low
+
+	SELECT EmpName , Salary ,
+	CASE 
+		WHEN Salary>=100000 THEN 'High'
+		WHEN Salary BETWEEN 70000 AND 99999 THEN 'Medium'
+		ELSE 'Low'
+	END AS Salar_Grade
+	FROM Employees;
+
+
+-- Q25. Display employees who were hired before their manager.
+
+	SELECT 
+		e1.EmpName  ,
+		e1.HireDate  As Emp_HireDate,
+		e2.EmpName AS Manager_name ,
+		e2.HireDate As Manager_HireDate
+	FROM Employees e1
+	LEFT JOIN Employees e2
+	ON e1.ManagerID = e2.EmpID
+	WHERE e1.HireDate > e2.HireDate;
+
+--Q26. Find employees who were hired earliest in each department.
+
+	SELECT EmpName , Department , HireDate 
+	FROM(
+		SELECT
+			EmpName ,
+			Department ,
+			HireDate, 
+			ROW_NUMBER() OVER(Partition by Department ORDER BY HireDate ASC) as Rank
+		FROM Employees
+			)t
+	WHERE Rank =1;
