@@ -231,3 +231,153 @@ WHERE e1.ManagerID IS NULL;
 		FROM Employees
 			)t
 	WHERE Rank =1;
+
+-- Q27 Find the highest salary from the Employees table.
+	SELECT 
+		EmpName ,
+		salary ,
+		salary_rank 
+	FROM (
+		SELECT *,
+		DENSE_RANK() OVER(ORDER BY salary DESC) as salary_rank
+		FROM Employees
+	)t
+	Where salary_rank =1;
+
+
+-- Q28 Find the second highest salary.
+	SELECT EmpName ,salary ,salary_rank 
+	FROM (
+	SELECT *,
+	DENSE_RANK() OVER(ORDER BY salary DESC) as salary_rank
+	FROM Employees
+	)t
+	Where salary_rank =2;
+
+-- Q29 Fetch employees whose salary is greater than the average salary.
+	SELECT EmpName , Salary , Avg_salary
+	FROM(
+	SELECT *,
+	AVG(salary) OVER() as Avg_salary
+	FROM Employees
+	)t
+	WHERE salary > Avg_salary
+	ORDER By Salary DESC;
+
+	-- OR 
+
+	SELECT EmpName , Salary 
+	FROM Employees
+	WHERE Salary>(SELECT AVG(Salary) FROM Employees)
+	ORDER BY Salary DESC;
+
+
+-- Q30 Count total number of employees.
+	SELECT
+		COUNT(EmpID) AS Total_Employees 
+	FROM Employees;
+-- Q31 Count number of employees in each department.
+	SELECT 
+		Department ,
+		COUNT(EmpID) AS Total_Employees 
+	FROM Employees
+	GROUP By Department;
+
+-- Q32Find departments having more than 3 employees.
+
+	SELECT DISTINCT Department ,Total_Employees
+	FROM (
+		SELECT 
+			Department ,
+			COUNT(EmpID) OVER(Partition By Department)AS Total_Employees 
+		FROM Employees
+	)t
+	WHERE Total_Employees >3 ;
+
+	-----    OR
+
+	SELECT Department , COUNT(EmpID)
+	FROM Employees
+	GROUP BY Department
+	HAVING COUNT(EmpID)>3;
+
+-- Q33 Retrieve employees with the minimum salary.
+
+	SELECT 
+		EmpName ,
+		Salary 
+	FROM Employees
+	WHERE Salary = ( SELECT MIN(Salary) FROM Employees);
+-- Q34 Get top 3 highest paid employees.
+	
+	SELECT 
+		TOP(3) 
+		EmpName,
+		Salary 
+	FROM EMployees
+	ORDER By Salary DESC;
+
+	      -- OR 
+
+	SELECT 
+		EmpName ,
+		Salary
+	FROM (
+		SELECT *,RANK() OVER(ORDER BY salary DESC) as Salary_rank 
+		FROM Employees
+		)t
+	Where Salary_rank <=3
+-- Q35 Find employees whose department is NULL.
+
+   SELECT EmpName ,Department
+   FROM Employees
+   WHERE Department IS NULL ;
+
+-- Q36 Find duplicate employee names.
+
+	SELECT EmpNAme, COUNT(*) AS EmpCount FROM Employees
+	GROUP BY EmpName 
+	HAVING COUNT(*) >1;
+
+-- Q37 Fetch employees who earn the same salary as someone else (i.e., duplicate salaries).
+
+SELECT 
+	EmpName ,
+	Salary
+	FROM 
+		(
+		SELECT *,
+			COUNT(Salary) OVER(Partition By Salary) as Salary_Count
+		FROM Employees
+		)t
+		Where Salary_Count>1;
+
+		--OR 
+		SELECT 
+			EmpName,
+			Salary,
+			COUNT(*)
+		FROM Employees
+		GROUP BY EmpName, Salary
+		HAVING COUNT(*) > 1;
+
+-- Q38 Fetch the department with the highest average salary.
+
+
+SELECT TOP(1) Department , AVG(salary) as Avg_salary
+FROM Employees
+GROUP By Department
+ORDER BY AVG(salary) DESC;
+
+--OR 
+SELECT DISTINCT  TOP(1) Department , Avg_salary 
+FROM
+(
+SELECT  Department , AVG(salary) OVER(Partition By Department)  as Avg_salary
+FROM Employees
+)t
+ORDER BY Avg_salary DESC;
+
+
+
+
